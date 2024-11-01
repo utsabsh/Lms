@@ -1,4 +1,6 @@
 const User = require("../../models/User");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const registerUser = async (req, res) => {
   const { userName, userEmail, password, role } = req.body;
   const existingUser = await User.findOne({
@@ -23,3 +25,37 @@ const registerUser = async (req, res) => {
     message: "user registered successfull",
   });
 };
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+  const accessToken = jwt.sign(
+    {
+      _id: user._id,
+      userName: user.userName,
+      userEmail: user.userEmail,
+      role: user.role,
+    },
+    "JWT_SECRET",
+    { expiresIn: "120m" }
+  );
+  res.status(200).json({
+    success: true,
+    message: "logged in successfully",
+    data: {
+      accessToken,
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        userEmail: user.userEmail,
+        role: user.role,
+      },
+    },
+  });
+};
+module.exports = { registerUser, loginUser };
