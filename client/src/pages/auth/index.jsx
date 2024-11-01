@@ -8,17 +8,39 @@ import {
 } from "@/components/ui/card";
 import { Tabs } from "@/components/ui/tabs";
 import { signInFormControls, signUpFormControls } from "@/config";
+import { AuthContext } from "@/context/auth-context";
 import { TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { GraduationCap } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("signin");
+  const {
+    signInFormData,
+    setSignInFormData,
+    signUpFormData,
+    setSignUpFormData,
+  } = useContext(AuthContext);
   function handleTabChange(value) {
     setActiveTab(value);
   }
-
+  function checkIfSignInFormIsValid() {
+    return (
+      signInFormData &&
+      signUpFormData.userEmail !== "" &&
+      signInFormData.password !== ""
+    );
+  }
+  function checkIfSignUpFormIsValid() {
+    return (
+      signUpFormData &&
+      signUpFormData.userEmail !== "" &&
+      signUpFormData.userEmail !== "" &&
+      signUpFormData.password !== ""
+    );
+  }
+  console.log(signInFormData);
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center border-b">
@@ -41,14 +63,17 @@ const AuthPage = () => {
           <TabsContent value="signin">
             <Card className="p-6 mt-2 space-y-4">
               <CardHeader>
-                <CardTitle>Create a new account</CardTitle>
+                <CardTitle>Sign In to your account</CardTitle>
                 <CardDescription>
-                  Enter your details to get started
+                  Enter your Email and password to access your account
                 </CardDescription>
                 <CardContent className="space-y-2">
                   <CommonForm
                     formControls={signInFormControls}
-                    buttonText={"SignIn"}
+                    buttonText={"Sign In"}
+                    formData={signInFormData}
+                    setFormData={setSignInFormData}
+                    isButtonDisabled={!checkIfSignInFormIsValid()}
                   />
                 </CardContent>
               </CardHeader>
@@ -57,14 +82,17 @@ const AuthPage = () => {
           <TabsContent value="signup">
             <Card className="p-6 mt-2 space-y-4">
               <CardHeader>
-                <CardTitle>Sign Up to your account</CardTitle>
+                <CardTitle>Create a new account</CardTitle>
                 <CardDescription>
-                  Enter your Email and password to access your account
+                  Enter your details to get started
                 </CardDescription>
                 <CardContent className="space-y-2">
                   <CommonForm
                     formControls={signUpFormControls}
-                    buttonText={"signUp"}
+                    buttonText={"Sign Up"}
+                    formData={signUpFormData}
+                    setFormData={setSignUpFormData}
+                    isButtonDisabled={!checkIfSignUpFormIsValid()}
                   />
                 </CardContent>
               </CardHeader>
