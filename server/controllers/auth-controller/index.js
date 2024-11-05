@@ -26,34 +26,38 @@ const registerUser = async (req, res) => {
   });
 };
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  const { userEmail, password } = req.body;
+
+  const checkUser = await User.findOne({ userEmail });
+
+  if (!checkUser || !bcrypt.compare(password, checkUser.password)) {
     return res.status(401).json({
       success: false,
-      message: "Invalid email or password",
+      message: "Invalid credentials",
     });
   }
+
   const accessToken = jwt.sign(
     {
-      _id: user._id,
-      userName: user.userName,
-      userEmail: user.userEmail,
-      role: user.role,
+      _id: checkUser._id,
+      userName: checkUser.userName,
+      userEmail: checkUser.userEmail,
+      role: checkUser.role,
     },
     "JWT_SECRET",
     { expiresIn: "120m" }
   );
+
   res.status(200).json({
     success: true,
-    message: "logged in successfully",
+    message: "Logged in successfully",
     data: {
       accessToken,
       user: {
-        _id: user._id,
-        userName: user.userName,
-        userEmail: user.userEmail,
-        role: user.role,
+        _id: checkUser._id,
+        userName: checkUser.userName,
+        userEmail: checkUser.userEmail,
+        role: checkUser.role,
       },
     },
   });
