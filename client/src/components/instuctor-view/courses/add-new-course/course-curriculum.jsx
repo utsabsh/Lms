@@ -7,13 +7,16 @@ import { useContext } from "react";
 import { Label } from "@/components/ui/label";
 import { courseCurriculumInitialFormData } from "@/config";
 import { mediaUploadService } from "@/services";
+import MediaProgressbar from "@/components/media-progress-bar";
 
 const CourseCurriculum = () => {
   const {
     courseCurriculumFormdata,
     setCourseCurriculumFormData,
-    mediauploadProgress,
+    mediaUploadProgress,
     setMediaProgress,
+    mediauploadProgressPercentage,
+    setMediauploadProgressPercentage,
   } = useContext(InstructorContext);
   function handleNewLecture() {
     setCourseCurriculumFormData([
@@ -48,8 +51,11 @@ const CourseCurriculum = () => {
       videoFormData.append("file", selectedFile);
       try {
         setMediaProgress(true);
-        const response = await mediaUploadService(videoFormData);
-        console.log(response, "----------");
+        const response = await mediaUploadService(
+          videoFormData,
+          setMediauploadProgressPercentage
+        );
+
         if (response.success) {
           let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
           cpyCourseCurriculumFormData[currentIndex] = {
@@ -65,7 +71,7 @@ const CourseCurriculum = () => {
       }
     }
   }
-  console.log(courseCurriculumFormdata);
+  console.log(courseCurriculumFormdata, "courseCurriculumformdata");
 
   return (
     <Card>
@@ -74,6 +80,12 @@ const CourseCurriculum = () => {
       </CardHeader>
       <CardContent>
         <Button onClick={handleNewLecture}>Add Lecture</Button>
+        {mediaUploadProgress ? (
+          <MediaProgressbar
+            isMediaUploading={mediaUploadProgress}
+            progress={mediauploadProgressPercentage}
+          />
+        ) : null}
         <div className="mt-4 space-y-4">
           {courseCurriculumFormdata.map((curriculumItem, index) => (
             <div className="border p-5 rounded-md" key={index}>
