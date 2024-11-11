@@ -6,8 +6,9 @@ import { InstructorContext } from "@/context/instructor-context";
 import { useContext } from "react";
 import { Label } from "@/components/ui/label";
 import { courseCurriculumInitialFormData } from "@/config";
-import { mediaUploadService } from "@/services";
+import { mediaDeleteService, mediaUploadService } from "@/services";
 import MediaProgressbar from "@/components/media-progress-bar";
+import VideoPlayer from "@/components/video-player";
 
 const CourseCurriculum = () => {
   const {
@@ -18,12 +19,14 @@ const CourseCurriculum = () => {
     mediauploadProgressPercentage,
     setMediauploadProgressPercentage,
   } = useContext(InstructorContext);
+
   function handleNewLecture() {
     setCourseCurriculumFormData([
       ...courseCurriculumFormdata,
       { ...courseCurriculumInitialFormData[0] },
     ]);
   }
+
   function handleCourseTitleChange(event, currentIndex) {
     let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
     cpyCourseCurriculumFormData[currentIndex] = {
@@ -33,6 +36,7 @@ const CourseCurriculum = () => {
 
     setCourseCurriculumFormData(cpyCourseCurriculumFormData);
   }
+
   function handleFreePreviewChange(currentValue, currentIndex) {
     let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
     cpyCourseCurriculumFormData[currentIndex] = {
@@ -42,6 +46,7 @@ const CourseCurriculum = () => {
 
     setCourseCurriculumFormData(cpyCourseCurriculumFormData);
   }
+
   //Handle single lecture upload
   async function handleSingleLectureUpload(event, currentIndex) {
     console.log("file", event.target.files);
@@ -71,7 +76,33 @@ const CourseCurriculum = () => {
       }
     }
   }
-  console.log(courseCurriculumFormdata, "courseCurriculumformdata");
+
+  function isCourseCurriculumFormDataValid() {
+    return courseCurriculumFormdata.every((item) => {
+      return (
+        item &&
+        typeof item === "object" &&
+        item.title.trim() !== "" &&
+        item.videoUrl.trim() !== ""
+      );
+    });
+  }
+  //handle video Replacement
+  async function handleReplaceVideo(currentIndex) {
+    let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
+    const getCurrentvideoPublicId = cpyCourseCurriculumFormData[0]?.public_id;
+    const deleteCurrentMediaResponse = await mediaDeleteService(
+      getCurrentvideoPublicId
+    );
+    if (deleteCurrentMediaResponse?.success) {
+      cpyCourseCurriculumFormData[currentIndex] = {
+        ...cpyCourseCurriculumFormData[currentIndex],
+        videoUrl: "",
+        public_id: "",
+      };
+      setCourseCurriculumFormData(cpyCourseCurriculumFormData);
+    }
+  }
 
   return (
     <Card>
@@ -79,7 +110,12 @@ const CourseCurriculum = () => {
         <CardTitle>Create Course Curriculum</CardTitle>
       </CardHeader>
       <CardContent>
-        <Button onClick={handleNewLecture}>Add Lecture</Button>
+        <Button
+          disabled={!isCourseCurriculumFormDataValid() || mediaUploadProgress}
+          onClick={handleNewLecture}
+        >
+          Add Lecture
+        </Button>
         {mediaUploadProgress ? (
           <MediaProgressbar
             isMediaUploading={mediaUploadProgress}
@@ -111,14 +147,28 @@ const CourseCurriculum = () => {
                   </Label>
                 </div>
               </div>
-              <div className="mt-6">
-                <Input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => handleSingleLectureUpload(e, index)}
-                  className="mb-4"
-                />
-              </div>
+              {courseCurriculumFormdata[index]?.videoUrl ? (
+                <div className="flex gap-3">
+                  <VideoPlayer
+                    url={courseCurriculumFormdata[index]?.videoUrl}
+                    width="450px"
+                    height="200px"
+                  />
+                  <Button onClick={() => handleReplaceVideo(index)}>
+                    Replace video
+                  </Button>
+                  <Button className="bg-red-900">Delete lecture</Button>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => handleSingleLectureUpload(e, index)}
+                    className="mb-4"
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
