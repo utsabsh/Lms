@@ -94,5 +94,5 @@ module.exports = {
   addNewCourse,
   getAllCourses,
   updateCourseById,
-  getCourseDetails,
+  getCourseDetailsById,
 };

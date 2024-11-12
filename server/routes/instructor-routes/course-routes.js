@@ -3,14 +3,14 @@ const {
   addNewCourse,
   getAllCourses,
   updateCourseById,
-  getCourseDetails,
+  getCourseDetailsById,
 } = require("../../controllers/instuctor-controller/course-controller");
 
 const router = express.Router();
 
 router.post("/add", addNewCourse);
 router.get("/get", getAllCourses);
-router.get("/get/details/:id", getCourseDetailsByID);
-router.put("/update/:id", updateCourseByID);
+router.get("/get/details/:id", getCourseDetailsById);
+router.put("/update/:id", updateCourseById);
 
 module.exports = router;
