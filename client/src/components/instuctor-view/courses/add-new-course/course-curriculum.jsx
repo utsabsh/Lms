@@ -3,22 +3,29 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InstructorContext } from "@/context/instructor-context";
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { courseCurriculumInitialFormData } from "@/config";
-import { mediaDeleteService, mediaUploadService } from "@/services";
+import {
+  mediaBulkUploadService,
+  mediaDeleteService,
+  mediaUploadService,
+} from "@/services";
 import MediaProgressbar from "@/components/media-progress-bar";
 import VideoPlayer from "@/components/video-player";
+import { Upload } from "lucide-react";
 
 const CourseCurriculum = () => {
   const {
     courseCurriculumFormData,
     setCourseCurriculumFormData,
     mediaUploadProgress,
-    setMediaProgress,
+    setMediaUploadProgress,
     mediauploadProgressPercentage,
     setMediauploadProgressPercentage,
   } = useContext(InstructorContext);
+
+  const bulkUploadInputRef = useRef(null);
 
   function handleNewLecture() {
     setCourseCurriculumFormData([
@@ -55,7 +62,7 @@ const CourseCurriculum = () => {
       const videoFormData = new FormData();
       videoFormData.append("file", selectedFile);
       try {
-        setMediaProgress(true);
+        setMediaUploadProgress(true);
         const response = await mediaUploadService(
           videoFormData,
           setMediauploadProgressPercentage
@@ -69,7 +76,7 @@ const CourseCurriculum = () => {
             public_id: response?.data?.public_id,
           };
           setCourseCurriculumFormData(cpyCourseCurriculumFormData);
-          setMediaProgress(false);
+          setMediaUploadProgress(false);
         }
       } catch (error) {
         console.log(error);
@@ -104,10 +111,83 @@ const CourseCurriculum = () => {
     }
   }
 
+  function handleOpenBulkUploadDialog() {
+    bulkUploadInputRef.current?.click();
+  }
+
+  function areAllCourseCurriculumFormDataObjectsEmpty(arr) {
+    return arr.every((obj) => {
+      return Object.entries(obj).every(([key, value]) => {
+        if (typeof value === "boolean") {
+          return true;
+        }
+        return value === "";
+      });
+    });
+  }
+
+  async function handleMediaBulkUpload(event) {
+    const selectedFiles = Array.from(event.target.files);
+    const bulkFormData = new FormData();
+
+    selectedFiles.forEach((fileItem) => bulkFormData.append("files", fileItem));
+
+    try {
+      setMediaUploadProgress(true);
+      const response = await mediaBulkUploadService(
+        bulkFormData,
+        mediauploadProgressPercentage
+      );
+
+      console.log(response, "bulk");
+      if (response?.success) {
+        let cpyCourseCurriculumFormdata =
+          areAllCourseCurriculumFormDataObjectsEmpty(courseCurriculumFormData)
+            ? []
+            : [...courseCurriculumFormData];
+
+        cpyCourseCurriculumFormdata = [
+          ...cpyCourseCurriculumFormdata,
+          ...response.data.map((item, index) => ({
+            videoUrl: item?.url,
+            public_id: item?.public_id,
+            title: `Lecture ${
+              cpyCourseCurriculumFormdata.length + (index + 1)
+            }`,
+            freePreview: false,
+          })),
+        ];
+        setCourseCurriculumFormData(cpyCourseCurriculumFormdata);
+        setMediaUploadProgress(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between">
         <CardTitle>Create Course Curriculum</CardTitle>
+        <div>
+          <Input
+            type="file"
+            ref={bulkUploadInputRef}
+            accept="video/*"
+            multiple
+            classname="hidden"
+            id="bulk-media-upload"
+            onClick={handleMediaBulkUpload}
+          />
+          <Button
+            as="label"
+            htmlFor="bulk-media-upload"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleOpenBulkUploadDialog}
+          >
+            <Upload className="w-4 h-5 mr-2" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Button

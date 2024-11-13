@@ -90,6 +90,7 @@ const updateCourseById = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   addNewCourse,
   getAllCourses,

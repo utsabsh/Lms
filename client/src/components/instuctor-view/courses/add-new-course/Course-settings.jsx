@@ -9,7 +9,7 @@ const CourseSettings = () => {
     courseLandingFormData,
     setCourseLandingFormData,
     mediaUploadProgress,
-    setMediaProgress,
+    setMediaUploadProgress,
     mediauploadProgressPercentage,
     setMediauploadProgressPercentage,
   } = useContext(InstructorContext);
@@ -21,7 +21,7 @@ const CourseSettings = () => {
       imageFormData.append("file", selectedImage);
 
       try {
-        setMediaProgress(true);
+        setMediaUploadProgress(true);
         const response = await mediaUploadService(
           imageFormData,
           setMediauploadProgressPercentage
@@ -32,7 +32,7 @@ const CourseSettings = () => {
             ...courseLandingFormData,
             image: response.data.url,
           });
-          setMediaProgress(false);
+          setMediaUploadProgress;
         }
       } catch (e) {
         console.log(e);
