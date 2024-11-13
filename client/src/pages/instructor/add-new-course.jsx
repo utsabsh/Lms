@@ -10,27 +10,36 @@ import {
 } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
-import { addNewCourseService } from "@/services";
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  addNewCourseService,
+  fetchInstructorCourseDetailsService,
+  updateCourseByIdService,
+} from "@/services";
+import { useContext, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const AddNewCouse = () => {
+const AddNewCourse = () => {
   const {
     courseLandingFormData,
     courseCurriculumFormData,
     setCourseLandingFormData,
     setCourseCurriculumFormData,
+    currentEditedCourseId,
+    setCurrentEditedCourseId,
   } = useContext(InstructorContext);
 
   const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
+  const params = useParams();
 
   function isEmpty(value) {
     if (Array.isArray(value)) {
       return value.length === 0;
     }
+
     return value === "" || value === null || value === undefined;
   }
+
   function validateFormData() {
     for (const key in courseLandingFormData) {
       if (isEmpty(courseLandingFormData[key])) {
@@ -56,6 +65,7 @@ const AddNewCouse = () => {
 
     return hasFreePreview;
   }
+
   async function handleCreateCourse() {
     const courseFinalFormData = {
       instructorId: auth?.user?._id,
@@ -66,13 +76,55 @@ const AddNewCouse = () => {
       curriculum: courseCurriculumFormData,
       isPublised: true,
     };
-    const response = await addNewCourseService(courseFinalFormData);
+
+    const response =
+      currentEditedCourseId !== null
+        ? await updateCourseByIdService(
+            currentEditedCourseId,
+            courseFinalFormData
+          )
+        : await addNewCourseService(courseFinalFormData);
+
     if (response?.success) {
       setCourseLandingFormData(courseLandingInitialFormData);
       setCourseCurriculumFormData(courseCurriculumInitialFormData);
       navigate(-1);
+      setCurrentEditedCourseId(null);
     }
+
+    console.log(courseFinalFormData, "courseFinalFormData");
   }
+
+  async function fetchCurrentCourseDetails() {
+    const response = await fetchInstructorCourseDetailsService(
+      currentEditedCourseId
+    );
+
+    if (response?.success) {
+      const setCourseFormData = Object.keys(
+        courseLandingInitialFormData
+      ).reduce((acc, key) => {
+        acc[key] = response?.data[key] || courseLandingInitialFormData[key];
+
+        return acc;
+      }, {});
+
+      console.log(setCourseFormData, response?.data, "setCourseFormData");
+      setCourseLandingFormData(setCourseFormData);
+      setCourseCurriculumFormData(response?.data?.curriculum);
+    }
+
+    console.log(response, "response");
+  }
+
+  useEffect(() => {
+    if (currentEditedCourseId !== null) fetchCurrentCourseDetails();
+  }, [currentEditedCourseId]);
+
+  useEffect(() => {
+    if (params?.courseId) setCurrentEditedCourseId(params?.courseId);
+  }, [params?.courseId]);
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between">
@@ -113,4 +165,4 @@ const AddNewCouse = () => {
   );
 };
 
-export default AddNewCouse;
+export default AddNewCourse;

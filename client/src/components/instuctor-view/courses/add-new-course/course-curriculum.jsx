@@ -12,7 +12,7 @@ import VideoPlayer from "@/components/video-player";
 
 const CourseCurriculum = () => {
   const {
-    courseCurriculumFormdata,
+    courseCurriculumFormData,
     setCourseCurriculumFormData,
     mediaUploadProgress,
     setMediaProgress,
@@ -22,13 +22,13 @@ const CourseCurriculum = () => {
 
   function handleNewLecture() {
     setCourseCurriculumFormData([
-      ...courseCurriculumFormdata,
+      ...courseCurriculumFormData,
       { ...courseCurriculumInitialFormData[0] },
     ]);
   }
 
   function handleCourseTitleChange(event, currentIndex) {
-    let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
+    let cpyCourseCurriculumFormData = [...courseCurriculumFormData];
     cpyCourseCurriculumFormData[currentIndex] = {
       ...cpyCourseCurriculumFormData[currentIndex],
       title: event.target.value,
@@ -38,7 +38,7 @@ const CourseCurriculum = () => {
   }
 
   function handleFreePreviewChange(currentValue, currentIndex) {
-    let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
+    let cpyCourseCurriculumFormData = [...courseCurriculumFormData];
     cpyCourseCurriculumFormData[currentIndex] = {
       ...cpyCourseCurriculumFormData[currentIndex],
       freePreview: currentValue,
@@ -62,7 +62,7 @@ const CourseCurriculum = () => {
         );
 
         if (response.success) {
-          let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
+          let cpyCourseCurriculumFormData = [...courseCurriculumFormData];
           cpyCourseCurriculumFormData[currentIndex] = {
             ...cpyCourseCurriculumFormData[currentIndex],
             videoUrl: response?.data?.playback_url,
@@ -78,7 +78,7 @@ const CourseCurriculum = () => {
   }
 
   function isCourseCurriculumFormDataValid() {
-    return courseCurriculumFormdata.every((item) => {
+    return courseCurriculumFormData.every((item) => {
       return (
         item &&
         typeof item === "object" &&
@@ -89,7 +89,7 @@ const CourseCurriculum = () => {
   }
   //handle video Replacement
   async function handleReplaceVideo(currentIndex) {
-    let cpyCourseCurriculumFormData = [...courseCurriculumFormdata];
+    let cpyCourseCurriculumFormData = [...courseCurriculumFormData];
     const getCurrentvideoPublicId = cpyCourseCurriculumFormData[0]?.public_id;
     const deleteCurrentMediaResponse = await mediaDeleteService(
       getCurrentvideoPublicId
@@ -123,7 +123,7 @@ const CourseCurriculum = () => {
           />
         ) : null}
         <div className="mt-4 space-y-4">
-          {courseCurriculumFormdata.map((curriculumItem, index) => (
+          {courseCurriculumFormData.map((curriculumItem, index) => (
             <div className="border p-5 rounded-md" key={index}>
               <div className="flex gap-5">
                 <h3 className="font-semibold">Lecture {index + 1}</h3>
@@ -132,14 +132,14 @@ const CourseCurriculum = () => {
                   placeholder="Enter lecture title"
                   className="max-w-96"
                   onChange={(event) => handleCourseTitleChange(event, index)}
-                  value={courseCurriculumFormdata[index]?.title}
+                  value={courseCurriculumFormData[index]?.title}
                 />
                 <div className="flex items-center space-x-2">
                   <Switch
                     onCheckedChange={(value) =>
                       handleFreePreviewChange(value, index)
                     }
-                    checked={courseCurriculumFormdata[index]?.freePreview}
+                    checked={courseCurriculumFormData[index]?.freePreview}
                     id={`freePreview-${index + 1}`}
                   />
                   <Label htmlFor={`freePreview-${index + 1}`}>
@@ -147,10 +147,10 @@ const CourseCurriculum = () => {
                   </Label>
                 </div>
               </div>
-              {courseCurriculumFormdata[index]?.videoUrl ? (
+              {courseCurriculumFormData[index]?.videoUrl ? (
                 <div className="flex gap-3">
                   <VideoPlayer
-                    url={courseCurriculumFormdata[index]?.videoUrl}
+                    url={courseCurriculumFormData[index]?.videoUrl}
                     width="450px"
                     height="200px"
                   />

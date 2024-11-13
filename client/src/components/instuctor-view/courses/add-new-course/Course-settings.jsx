@@ -7,7 +7,7 @@ import { useContext } from "react";
 const CourseSettings = () => {
   const {
     courseLandingFormData,
-    setcourseLandingFormData,
+    setCourseLandingFormData,
     mediaUploadProgress,
     setMediaProgress,
     mediauploadProgressPercentage,
@@ -28,7 +28,7 @@ const CourseSettings = () => {
         );
         if (response.success) {
           console.log("res", response.data.url);
-          setcourseLandingFormData({
+          setCourseLandingFormData({
             ...courseLandingFormData,
             image: response.data.url,
           });

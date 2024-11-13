@@ -9,17 +9,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  courseCurriculumInitialFormData,
+  courseLandingInitialFormData,
+} from "@/config";
+import { InstructorContext } from "@/context/instructor-context";
 import { Delete, Edit } from "lucide-react";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function InstructorCourses() {
+export default function InstructorCourses({ listOfCourses }) {
   const navigate = useNavigate();
+  const {
+    setCurrentEditedCourseId,
+    setCourseLandingFormData,
+    setCourseCurriculumFormData,
+  } = useContext(InstructorContext);
+
   return (
     <Card>
       <CardHeader className="flex justify-between flex-row items-center">
         <CardTitle className="text-3xl font-extrabold">All courses</CardTitle>
         <Button
-          onClick={() => navigate("/instructor/create-new-course")}
+          onClick={() => {
+            setCurrentEditedCourseId(null);
+            setCourseLandingFormData(courseLandingInitialFormData);
+            setCourseCurriculumFormData(courseCurriculumInitialFormData);
+            navigate("/instructor/create-new-course");
+          }}
           className="p-6"
         >
           Create New Course
@@ -38,21 +55,33 @@ export default function InstructorCourses() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">
-                  React js full course
-                </TableCell>
-                <TableCell>100</TableCell>
-                <TableCell>$500</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-6 w-6" />{" "}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Delete className="h-6 w-6" />{" "}
-                  </Button>
-                </TableCell>
-              </TableRow>
+              {listOfCourses && listOfCourses.length > 0
+                ? listOfCourses.map((course) => (
+                    <TableRow key={course?._id}>
+                      <TableCell className="font-medium">
+                        {course?.title}
+                      </TableCell>
+                      <TableCell>{course?.students?.length}</TableCell>
+                      <TableCell>
+                        ${course?.students?.length * course?.pricing}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          onClick={() => {
+                            navigate(`/instructor/edit-course/${course?._id}`);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          <Edit className="h-6 w-6" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Delete className="h-6 w-6" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : null}
             </TableBody>
           </Table>
         </div>

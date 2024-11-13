@@ -15,6 +15,7 @@ const InstructorDashboardPageindex = () => {
     useContext(InstructorContext);
   async function fetchAllcourses() {
     const response = await fetchInstructorCourseListService();
+    console.log(response, "response");
 
     if (response?.success) {
       setInstructorCoursesList(response?.data);
@@ -23,6 +24,7 @@ const InstructorDashboardPageindex = () => {
   useEffect(() => {
     fetchAllcourses();
   }, []);
+  console.log("instructorCoursesList", instructorCoursesList);
 
   const menuItems = [
     {
@@ -35,7 +37,7 @@ const InstructorDashboardPageindex = () => {
       icon: Book,
       label: "Courses",
       value: "courses",
-      component: <InstructorCourses />,
+      component: <InstructorCourses listOfCourses={instructorCoursesList} />,
     },
     {
       icon: LogOut,
